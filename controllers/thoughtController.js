@@ -106,7 +106,7 @@ module.exports = {
           .json({ message: 'No thought found with that ID :(' });
       }
 
-      res.json(user);
+      res.json(thought);
     } catch (err) {
       res.status(500).json(err);
     }
