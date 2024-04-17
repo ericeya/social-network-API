@@ -45,7 +45,7 @@ module.exports = {
         return res.status(404).json({ message: 'No such user exists' });
       }
 
-      res.json(thought, userThought);
+      res.json(thought);
     } catch (err) {
       res.status(500).json(err);
     }
