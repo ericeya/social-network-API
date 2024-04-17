@@ -8,22 +8,6 @@ const headCount = async () => {
   return numberOfUsers;
 }
 
-// Aggregate function for getting the overall grade using $avg
-// const grade = async (userId) =>
-//   User.aggregate([
-//     // only include the given student by using $match
-//     { $match: { _id: new ObjectId(userId) } },
-//     {
-//       $unwind: '$assignments',
-//     },
-//     {
-//       $group: {
-//         _id: new ObjectId(userId),
-//         overallGrade: { $avg: '$assignments.score' },
-//       },
-//     },
-//   ]);
-
 module.exports = {
   // Get all students
   async getUsers(req, res) {
@@ -120,15 +104,13 @@ module.exports = {
     try {
       const user = await User.findOneAndUpdate(
         { _id: req.params.userId },
-        { $addToSet: { friends: req.body } },
+        { $addToSet: { friends: req.params.friendId } },
         { new: true }
       )
 
-      // const userFriend = await User.findOneAndUpdate(
-      //   { _id: req.body },
-      //   { $addToSet: { friends: req.params.userId } },
-      //   { new: true }
-      // )
+      if (!user) {
+        return res.status(404).json({ message: 'No such user exists' });
+      }
 
       res.json(user);
     } catch (err) {
@@ -140,63 +122,18 @@ module.exports = {
     try {
       const user = await User.findOneAndUpdate(
         { _id: req.params.userId },
-        { $pull: { friends: req.body } },
+        { $pull: { friends: req.params.friendId } },
         { new: true }
       )
 
-      // const userFriend = await User.findOneAndUpdate(
-      //   { _id: req.body },
-      //   { $pull: { friends: req.params.userId } },
-      //   { new: true }
-      // )
-
-      res.json(user);
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  },
-
-  // Add an assignment to a student
-  async addThought(req, res) {
-    console.log('You are adding a thought');
-    console.log(req.body);
-
-    try {
-      const user = await User.findOneAndUpdate(
-        { _id: req.params.userId },
-        { $addToSet: { thoughts: req.body } },
-        { new: true }
-      );
-
       if (!user) {
-        return res
-          .status(404)
-          .json({ message: 'No user found with that ID :(' });
+        return res.status(404).json({ message: 'No such user exists' });
       }
-
+      
       res.json(user);
     } catch (err) {
       res.status(500).json(err);
     }
   },
-  // Remove assignment from a student
-  async removeThought(req, res) {
-    try {
-      const user = await User.findOneAndUpdate(
-        { _id: req.params.userId },
-        { $pull: { thought: { thoughtId: req.params.thoughtId } } },
-        { new: true }
-      );
-
-      if (!user) {
-        return res
-          .status(404)
-          .json({ message: 'No user found with that ID :(' });
-      }
-
-      res.json(user);
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  },
+  
 };
