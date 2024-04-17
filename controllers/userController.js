@@ -56,16 +56,14 @@ module.exports = {
   // Delete a student and remove them from the course
   async deleteUser(req, res) {
     try {
-      const user = await User.findOneAndRemove({ _id: req.params.userId });
+      const user = await User.findOneAndDelete({ _id: req.params.userId });
 
       if (!user) {
         return res.status(404).json({ message: 'No such user exists' });
       }
 
-      const thoughts = await Thought.findOneAndUpdate(
-        { thoughts: req.params.userId },
-        { $pull: { thoughts: req.params.userId } },
-        { new: true }
+      const thoughts = await Thought.deleteMany(
+        { _id: { $in: user.thoughts }}
       );
 
       if (!thoughts) {
@@ -74,7 +72,7 @@ module.exports = {
         });
       }
 
-      res.json({ message: 'Student successfully deleted' });
+      res.json({ message: 'User successfully deleted' });
     } catch (err) {
       console.log(err);
       res.status(500).json(err);
